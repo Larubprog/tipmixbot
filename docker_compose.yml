@@ -5,4 +5,5 @@ services:
     container_name: fifa_betting
     volumes:
       - .:/app
-    command: python src/main.py
+    command: python -m src.main
+
