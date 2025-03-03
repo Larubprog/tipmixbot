@@ -8,6 +8,8 @@ from src.telegram_bot import compare_odds_with_stats
 import os
 import glob
 
+print("✅ TipmixBot is starting...")  
+
 def cleanup_data_directory():
     """Delete all JSON files in the data directory except for essential files."""
     data_dir = "data"
@@ -34,18 +36,25 @@ def ensure_data_directory_exists():
 
 async def run_workflow():
     try:
-        print("Starting workflow...")
+        print("🚀 Starting workflow...")
         await scrape_tippmix()
+        print("✅ Scraping completed.")
+
         extract_odds()
+        print("✅ Odds extraction completed.")
+
         historical_data_main()
+        print("✅ Historical data processing completed.")
+
         compare_odds_with_stats("data/games_with_odds.json")
-        print("Workflow completed.")
+        print("✅ Comparison with stats completed.")
+
+        print("🎉 Workflow completed successfully.")
     except Exception as e:
-        print(f"Error in workflow: {e}")
+        print(f"❌ Error in workflow: {e}")
     finally:
-        # Clean up JSON files after the workflow
         cleanup_data_directory()
-        print("Cleanup completed. Waiting for the next run...")
+        print("🧹 Cleanup completed. Waiting for the next run...")
 
 def schedule_workflow():
     # Ensure the data directory exists
