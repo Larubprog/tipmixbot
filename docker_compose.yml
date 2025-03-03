@@ -1,0 +1,8 @@
+version: '3'
+services:
+  app:
+    build: .
+    container_name: fifa_betting
+    volumes:
+      - .:/app
+    command: python src/main.py
