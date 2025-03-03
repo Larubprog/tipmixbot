@@ -60,4 +60,8 @@ def schedule_workflow():
         time.sleep(1)
 
 if __name__ == "__main__":
-    schedule_workflow()
+    print("Running the workflow immediately...")
+    asyncio.run(run_workflow())  # Run once immediately
+
+    print("Starting scheduled workflow...")
+    schedule_workflow()  # Then start the scheduled loop
