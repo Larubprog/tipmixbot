@@ -57,16 +57,19 @@ async def run_workflow():
         print("🧹 Cleanup completed. Waiting for the next run...")
 
 def schedule_workflow():
+    print("⏳ Scheduling workflow to run every 2.5 minutes...")
+    
     # Ensure the data directory exists
     ensure_data_directory_exists()
 
     # Schedule the workflow to run every 2.5 minutes
     schedule.every(2.5).minutes.do(lambda: asyncio.run(run_workflow()))
 
-    # Keep the script running
     while True:
+        print("⌛ Waiting for the next scheduled task...")
         schedule.run_pending()
-        time.sleep(1)
+        time.sleep(60)  # Reduce log spam by waiting 60 sec instead of 1 sec
+
 
 if __name__ == "__main__":
     print("Running the workflow immediately...")
