@@ -72,8 +72,7 @@ def schedule_workflow():
 
 
 if __name__ == "__main__":
-    print("Running the workflow immediately...")
+    print("🎯 TipmixBot is initializing...")
     asyncio.run(run_workflow())  # Run once immediately
-
-    print("Starting scheduled workflow...")
-    schedule_workflow()  # Then start the scheduled loop
+    print("✅ Initial workflow run complete, entering scheduling loop...")
+    schedule_workflow()
