@@ -6,3 +6,4 @@ openpyxl
 dropbox
 python-telegram-bot
 schedule
+lxml
