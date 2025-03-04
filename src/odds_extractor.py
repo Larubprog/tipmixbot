@@ -1,5 +1,6 @@
 import json
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -8,7 +9,15 @@ from bs4 import BeautifulSoup
 def extract_market_titles_and_odds(url):
     options = webdriver.ChromeOptions()
     options.add_argument('--headless')
-    driver = webdriver.Chrome(options=options)
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+
+    # Explicitly set the correct paths for Docker
+    options.binary_location = "/usr/bin/chromium"  # Path to Chromium in Docker
+    service = Service("/usr/bin/chromedriver")  # Path to Chromedriver
+
+    # Create the WebDriver
+    driver = webdriver.Chrome(service=service, options=options)
 
     try:
         driver.get(url)
@@ -87,7 +96,7 @@ def extract_odds():
         games_with_market_data.append(game_data)
     with open('data/games_with_odds.json', 'w') as outfile:
         json.dump(games_with_market_data, outfile, indent=4, ensure_ascii=False)
-    print("Market data extraction complete. Check 'data/games_with_market_titles_and_odds.json' for the results.")
+    print("✅ Market data extraction complete. Check 'data/games_with_odds.json' for the results.")
 
 if __name__ == "__main__":
     extract_odds()
