@@ -4,7 +4,7 @@ FROM python:3.9-slim
 # Set the working directory
 WORKDIR /app
 
-# Install system dependencies including Chrome and Chromedriver
+# Install system dependencies including Chromium and ChromeDriver
 RUN apt-get update && apt-get install -y \
     wget \
     curl \
@@ -26,15 +26,8 @@ RUN apt-get update && apt-get install -y \
     libx11-xcb1 \
     && rm -rf /var/lib/apt/lists/*
 
-    # Install ChromeDriver
-RUN wget https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip && \
-    unzip chromedriver_linux64.zip && \
-    mv chromedriver /usr/bin/chromedriver && \
-    chmod +x /usr/bin/chromedriver && \
-    rm chromedriver_linux64.zip
-
 # Set environment variables for Selenium
-ENV PATH="/usr/lib/chromium/:$PATH"
+ENV PATH="/usr/lib/chromium:/usr/bin/chromedriver:$PATH"
 
 # Copy project files into the container
 COPY . /app
