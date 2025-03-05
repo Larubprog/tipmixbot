@@ -12,11 +12,11 @@ def extract_market_titles_and_odds(url):
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
 
-    # Explicitly set the correct paths for Docker
-    options.binary_location = "/usr/bin/chromium"  # Path to Chromium in Docker
-    service = Service("/usr/bin/chromedriver")  # Path to Chromedriver
+    options = webdriver.ChromeOptions()
+    options.binary_location = "/usr/bin/chromium"  # Path to Chromium
+    service = Service("/usr/bin/chromedriver")  # Path to ChromeDriver
 
-    # Create the WebDriver
+# Create the WebDriver
     driver = webdriver.Chrome(service=service, options=options)
 
     try:
