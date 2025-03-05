@@ -517,16 +517,36 @@ def compare_odds_with_stats(games_with_odds):
     except json.JSONDecodeError as e:
         print(f"Error: Invalid JSON format in file - {e}")
         return
+
+    # Load the tippmixpro_upcoming_games.json file
+    try:
+        tippmix_games = load_json("data/tippmixpro_upcoming_games.json")
+    except FileNotFoundError as e:
+        print(f"Error: Tippmix file not found - {e}")
+        return
+    except json.JSONDecodeError as e:
+        print(f"Error: Invalid JSON format in Tippmix file - {e}")
+        return
+
     for game in games_data:
         home_team = game['home']
         away_team = game['away']
         market_data = game['market_data']
         player1 = home_team.split('(')[-1].rstrip(')')
         player2 = away_team.split('(')[-1].rstrip(')')
+
+        # Find the corresponding link from tippmixpro_upcoming_games.json
+        match_link = None
+        for tippmix_game in tippmix_games['games']:
+            if tippmix_game['home'] == home_team and tippmix_game['away'] == away_team:
+                match_link = tippmix_game['link']
+                break
+
         stats_file = f"data/{player1}_vs_{player2}_stats.json"
         if not os.path.exists(stats_file):
             print(f"Stats file not found for {player1} vs {player2}. Skipping this match.")
             continue
+
         try:
             stats_data = load_json(stats_file)
         except FileNotFoundError as e:
@@ -535,6 +555,7 @@ def compare_odds_with_stats(games_with_odds):
         except json.JSONDecodeError as e:
             print(f"Error: Invalid JSON format in stats file - {e}")
             continue
+
         for market in market_data:
             if market['market_title'] == "1X2 - Rendes játékidő - Full Game":
                 for odd in market['odds']:
@@ -550,6 +571,7 @@ def compare_odds_with_stats(games_with_odds):
                 past_25 = stats_data['stats']['past_25']
                 past_50 = stats_data['stats']['past_50']
                 past_30_days = stats_data['stats']['past_30_days']
+
                 if past_25['win_draw_loss']['win'] >= WIN_PROBABILITY_THRESHOLD and home_odds >= WIN_ODD:
                     output_file = generate_file_name(player1, player2)
                     generate_excel(stats_data, output_file)
@@ -563,10 +585,12 @@ def compare_odds_with_stats(games_with_odds):
                         f"**(Past 25 Games):** {past_25['win_draw_loss']['win']}%\n"
                         f"**(Past 50 Games):** {past_50['win_draw_loss']['win']}%\n"
                         f"**(Past 30 Days):** {past_30_days['win_draw_loss']['win']}%\n\n"  
+                        f"**Match Link:** {match_link}\n\n"  # Include the match link
                         f"{shareable_link}\n"
                     )
                     print(message)
                     send_telegram_message(message)
+
                 if past_25['win_draw_loss']['loss'] >= WIN_PROBABILITY_THRESHOLD and away_odds >= WIN_ODD:
                     output_file = generate_file_name(player1, player2)
                     generate_excel(stats_data, output_file)
@@ -574,16 +598,18 @@ def compare_odds_with_stats(games_with_odds):
                     shareable_link = upload_to_dropbox(output_file, dropbox_path)
                     message = (
                         f"🚨 **Opportunity Detected** 🚨\n\n"  
-                        f"**Bet On:** Home Win ({player1})\n\n"  
+                        f"**Bet On:** Away Win ({player2})\n\n"  
                         f"**Match:** {player1} vs {player2}\n\n"  
-                        f"**Odds:** {home_odds}\n\n"  
+                        f"**Odds:** {away_odds}\n\n"  
                         f"**(Past 25 Games):** {past_25['win_draw_loss']['loss']}%\n"
                         f"**(Past 50 Games):** {past_50['win_draw_loss']['loss']}%\n"
                         f"**(Past 30 Days):** {past_30_days['win_draw_loss']['loss']}%\n\n"  
+                        f"**Match Link:** {match_link}\n\n"  # Include the match link
                         f"{shareable_link}\n"
                     )
                     print(message)
                     send_telegram_message(message)
+
                 if past_25['win_draw_loss']['draw'] >= DRAW_PROBABILITY_THRESHOLD and draw_odds >= DRAW_ODD:
                     output_file = generate_file_name(player1, player2)
                     generate_excel(stats_data, output_file)
@@ -591,16 +617,18 @@ def compare_odds_with_stats(games_with_odds):
                     shareable_link = upload_to_dropbox(output_file, dropbox_path)
                     message = (
                         f"🚨 **Opportunity Detected** 🚨\n\n"  
-                        f"**Bet On:** Home Win ({player1})\n\n"  
+                        f"**Bet On:** Draw\n\n"  
                         f"**Match:** {player1} vs {player2}\n\n"  
-                        f"**Odds:** {home_odds}\n\n"  
+                        f"**Odds:** {draw_odds}\n\n"  
                         f"**(Past 25 Games):** {past_25['win_draw_loss']['draw']}%\n"
                         f"**(Past 50 Games):** {past_50['win_draw_loss']['draw']}%\n"
                         f"**(Past 30 Days):** {past_30_days['win_draw_loss']['draw']}%\n\n"  
+                        f"**Match Link:** {match_link}\n\n"  # Include the match link
                         f"{shareable_link}\n"
                     )
                     print(message)
                     send_telegram_message(message)
+
             if "Gólszám - Rendes játékidő" in market['market_title']:  
                 for odd in market['odds']:
                     line = odd.get('line')
@@ -618,6 +646,7 @@ def compare_odds_with_stats(games_with_odds):
                     below_prob_50 = past_50_goal_thresholds['below'].get(line_key, 0)
                     above_prob_30 = past_30_days_goal_thresholds['above'].get(line_key, 0)
                     below_prob_30 = past_30_days_goal_thresholds['below'].get(line_key, 0)
+
                     if above_prob_25 >= GOAL_PROBABILITY_THRESHOLD and over_odds >= GOAL_ODD:
                         output_file = generate_file_name(player1, player2)
                         generate_excel(stats_data, output_file)
@@ -631,10 +660,12 @@ def compare_odds_with_stats(games_with_odds):
                             f"**(Past 25 Games):** {above_prob_25}%\n"
                             f"**(Past 50 Games):** {above_prob_50}%\n"
                             f"**(Past 30 Days):** {above_prob_30}%\n\n"  
+                            f"**Match Link:** {match_link}\n\n"  # Include the match link
                             f"{shareable_link}\n"
                         )
                         print(message)
                         send_telegram_message(message)
+
                     if below_prob_25 >= GOAL_PROBABILITY_THRESHOLD and under_odds >= GOAL_ODD:
                         output_file = generate_file_name(player1, player2)
                         generate_excel(stats_data, output_file)
@@ -642,12 +673,13 @@ def compare_odds_with_stats(games_with_odds):
                         shareable_link = upload_to_dropbox(output_file, dropbox_path)
                         message = (
                             f"🚨 **Opportunity Detected** 🚨\n\n"  
-                            f"**Bet On:** Over {line} Goals\n\n"  
+                            f"**Bet On:** Under {line} Goals\n\n"  
                             f"**Match:** {player1} vs {player2}\n\n"  
-                            f"**Odds:** {over_odds}\n\n"  
+                            f"**Odds:** {under_odds}\n\n"  
                             f"**(Past 25 Games):** {below_prob_25}%\n"
                             f"**(Past 50 Games):** {below_prob_50}%\n"
                             f"**(Past 30 Days):** {below_prob_30}%\n\n"  
+                            f"**Match Link:** {match_link}\n\n"  # Include the match link
                             f"{shareable_link}\n"
                         )
                         print(message)
