@@ -6,17 +6,19 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 
-def extract_market_titles_and_odds(url):
-    options = webdriver.ChromeOptions()
-    options.add_argument('--headless')
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
 
+def extract_market_titles_and_odds(url):
+    # Set up Chrome options
     options = webdriver.ChromeOptions()
+    options.add_argument('--headless')  # Run in headless mode
+    options.add_argument('--no-sandbox')  # Disable sandbox for Docker
+    options.add_argument('--disable-dev-shm-usage')  # Avoid memory issues
     options.binary_location = "/usr/bin/chromium"  # Path to Chromium
+
+    # Set up ChromeDriver service
     service = Service("/usr/bin/chromedriver")  # Path to ChromeDriver
 
-# Create the WebDriver
+    # Create the WebDriver
     driver = webdriver.Chrome(service=service, options=options)
 
     try:
@@ -80,6 +82,7 @@ def extract_market_titles_and_odds(url):
     finally:
         driver.quit()
 
+
 def extract_odds():
     with open('data/tippmixpro_upcoming_games.json', 'r') as file:
         data = json.load(file)
@@ -97,6 +100,7 @@ def extract_odds():
     with open('data/games_with_odds.json', 'w') as outfile:
         json.dump(games_with_market_data, outfile, indent=4, ensure_ascii=False)
     print("✅ Market data extraction complete. Check 'data/games_with_odds.json' for the results.")
+
 
 if __name__ == "__main__":
     extract_odds()
