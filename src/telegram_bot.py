@@ -590,7 +590,7 @@ def compare_odds_with_stats(games_with_odds):
                     )
                     print(message)
                     send_telegram_message(message)
-
+                
                 if past_25['win_draw_loss']['loss'] >= WIN_PROBABILITY_THRESHOLD and away_odds >= WIN_ODD:
                     output_file = generate_file_name(player1, player2)
                     generate_excel(stats_data, output_file)
@@ -609,7 +609,7 @@ def compare_odds_with_stats(games_with_odds):
                     )
                     print(message)
                     send_telegram_message(message)
-
+                
                 if past_25['win_draw_loss']['draw'] >= DRAW_PROBABILITY_THRESHOLD and draw_odds >= DRAW_ODD:
                     output_file = generate_file_name(player1, player2)
                     generate_excel(stats_data, output_file)
