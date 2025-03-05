@@ -13,7 +13,7 @@ print("✅ TipmixBot is starting...")
 def cleanup_data_directory():
     """Delete all JSON files in the data directory except for essential files."""
     data_dir = "data"
-    essential_files = ["tippmixpro_upcoming_games.json", "games_with_odds.json", ""]  # Add files to exclude from deletion
+    essential_files = ["tippmixpro_upcoming_games.json", "games_with_odds.json", "player_stats_output.json"]  # Add files to exclude from deletion
 
     # Get a list of all JSON files in the data directory
     json_files = glob.glob(os.path.join(data_dir, "*.json"))
