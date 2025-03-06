@@ -20,16 +20,16 @@ DRAW_ODD = 3
 
 def get_channel_messages(limit=10):
     """
-    Fetch the latest messages from the Telegram channel.
+    Fetch the latest messages from the Telegram channel using getChatHistory.
     """
-    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getUpdates"
-    params = {
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getChatHistory"
+    payload = {
         "chat_id": TELEGRAM_CHAT_ID,
         "limit": limit
     }
-    response = requests.get(url, params=params)
+    response = requests.post(url, json=payload)
     if response.status_code == 200:
-        return response.json().get("result", [])
+        return response.json().get("result", {}).get("messages", [])
     else:
         print(f"Failed to fetch messages: {response.status_code}")
         return []
@@ -40,8 +40,8 @@ def extract_links_from_messages(messages):
     """
     links = []
     for message in messages:
-        if "text" in message.get("message", {}):
-            text = message["message"]["text"]
+        if "text" in message:
+            text = message["text"]
             if "tippmixpro.hu" in text:
                 # Extract the link from the message
                 start = text.find("https://www.tippmixpro.hu")
@@ -50,6 +50,32 @@ def extract_links_from_messages(messages):
                     link = text[start:end] if end != -1 else text[start:]
                     links.append(link)
     return links
+
+def send_telegram_message(message, link):
+    """
+    Send a message to the Telegram channel only if the link is not already present.
+    """
+    # Fetch the latest messages from the channel
+    messages = get_channel_messages()
+    existing_links = extract_links_from_messages(messages)
+
+    # Check if the link is already in the channel
+    if link in existing_links:
+        print(f"Link already exists in the channel: {link}")
+        return
+
+    # If the link is not found, send the message
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    payload = {
+        "chat_id": TELEGRAM_CHAT_ID,
+        "text": message,
+        "parse_mode": "Markdown"
+    }
+    response = requests.post(url, json=payload)
+    if response.status_code == 200:
+        print("Message sent successfully!")
+    else:
+        print(f"Failed to send message: {response.status_code}")
 
 def send_telegram_message(message, link):
     """
