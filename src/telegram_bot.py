@@ -18,7 +18,53 @@ GOAL_ODD = 1.8
 DRAW_PROBABILITY_THRESHOLD = 40
 DRAW_ODD = 3
 
-def send_telegram_message(message):
+def get_channel_messages(limit=10):
+    """
+    Fetch the latest messages from the Telegram channel.
+    """
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getUpdates"
+    params = {
+        "chat_id": TELEGRAM_CHAT_ID,
+        "limit": limit
+    }
+    response = requests.get(url, params=params)
+    if response.status_code == 200:
+        return response.json().get("result", [])
+    else:
+        print(f"Failed to fetch messages: {response.status_code}")
+        return []
+
+def extract_links_from_messages(messages):
+    """
+    Extract all TippmixPro links from the messages.
+    """
+    links = []
+    for message in messages:
+        if "text" in message.get("message", {}):
+            text = message["message"]["text"]
+            if "tippmixpro.hu" in text:
+                # Extract the link from the message
+                start = text.find("https://www.tippmixpro.hu")
+                if start != -1:
+                    end = text.find("\n", start)
+                    link = text[start:end] if end != -1 else text[start:]
+                    links.append(link)
+    return links
+
+def send_telegram_message(message, link):
+    """
+    Send a message to the Telegram channel only if the link is not already present.
+    """
+    # Fetch the latest messages from the channel
+    messages = get_channel_messages()
+    existing_links = extract_links_from_messages(messages)
+
+    # Check if the link is already in the channel
+    if link in existing_links:
+        print(f"Link already exists in the channel: {link}")
+        return
+
+    # If the link is not found, send the message
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     payload = {
         "chat_id": TELEGRAM_CHAT_ID,
@@ -26,7 +72,10 @@ def send_telegram_message(message):
         "parse_mode": "Markdown"
     }
     response = requests.post(url, json=payload)
-    return response.json()
+    if response.status_code == 200:
+        print("Message sent successfully!")
+    else:
+        print(f"Failed to send message: {response.status_code}")
 
 def load_json(file_path):
     with open(file_path, 'r') as file:
@@ -589,7 +638,7 @@ def compare_odds_with_stats(games_with_odds):
                         f"{shareable_link}\n"
                     )
                     print(message)
-                    send_telegram_message(message)
+                    send_telegram_message(message, match_link)  # Pass the link to check
                 
                 if past_25['win_draw_loss']['loss'] >= WIN_PROBABILITY_THRESHOLD and away_odds >= WIN_ODD:
                     output_file = generate_file_name(player1, player2)
@@ -608,7 +657,7 @@ def compare_odds_with_stats(games_with_odds):
                         f"{shareable_link}\n"
                     )
                     print(message)
-                    send_telegram_message(message)
+                    send_telegram_message(message, match_link)  # Pass the link to check
                 
                 if past_25['win_draw_loss']['draw'] >= DRAW_PROBABILITY_THRESHOLD and draw_odds >= DRAW_ODD:
                     output_file = generate_file_name(player1, player2)
@@ -627,7 +676,7 @@ def compare_odds_with_stats(games_with_odds):
                         f"{shareable_link}\n"
                     )
                     print(message)
-                    send_telegram_message(message)
+                    send_telegram_message(message, match_link)  # Pass the link to check
 
             if "Gólszám - Rendes játékidő" in market['market_title']:  
                 for odd in market['odds']:
@@ -664,7 +713,7 @@ def compare_odds_with_stats(games_with_odds):
                             f"{shareable_link}\n"
                         )
                         print(message)
-                        send_telegram_message(message)
+                        send_telegram_message(message, match_link)  # Pass the link to check
 
                     if below_prob_25 >= GOAL_PROBABILITY_THRESHOLD and under_odds >= GOAL_ODD:
                         output_file = generate_file_name(player1, player2)
@@ -683,7 +732,7 @@ def compare_odds_with_stats(games_with_odds):
                             f"{shareable_link}\n"
                         )
                         print(message)
-                        send_telegram_message(message)
+                        send_telegram_message(message, match_link)  # Pass the link to check
 
 if __name__ == "__main__":
     games_with_odds_file = "data/games_with_odds.json"
