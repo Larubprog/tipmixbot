@@ -7,6 +7,7 @@ from datetime import datetime
 import dropbox
 from openpyxl.utils import get_column_letter
 
+# Constants
 TELEGRAM_BOT_TOKEN = '7782619411:AAGABgCUSd4FpVCFzbXWsS9rAy6coxnhQq0'
 TELEGRAM_CHAT_ID = '-4662546396'
 DROPBOX_ACCESS_TOKEN = 'sl.u.AFnVj6WdUkqcBE_5TOLaAy8r2yPw_4MB4w6nvEAqbgQcjGvjhClZ1611TSCsIdJ9yd2aVsSG7A3R7l4i3HJxP3lZUtCTOVO_6x830gOfaOMcU34VSyEjjjaPUIWAVGEhtajjvNEXeaOZ9-dhV3_t6lj-BRx0BOY9BxYz-b8XcduFnMizH_VitibeJ7ARTZXCgEoufetgXGvbjM8D4UqOf07ODIOcGIRzpGfgHFvDBXXvqFi5RQQzqY4hF9VtpU6j2f-0_PaBIpS2SYqCjMYpdGewICDHzS7pfYhmVVxV_aokYx_TzomtEdD9Amm_Lm0wm2MzAx8C4U0hYJM64ld2ZwuFuMgXjR5iIX2-dAMogCAB4Y57qnMhU1Dx_zSVhwWvYVwusUDQJTIOWTaEIhex9vGjRsHZC3dhTSd7jrY8uQfZe7YQ_z8mQEIcO8WGDNybJNgaoTbiqwmxcn6Z0TYfA3iaeKjeeotkYuMFCb2o5qupbXBll73I-dacYzZy5B2VIvfgXYqSg0wnif_Ce5lJViaRBmt2pAYHbY-KakHSb1c0KKOQBCXozj5tkfNo1lXs6D8Edg_QOM6cy33l2qoY3e20dyRU6JIBoVB6Drl-8e17pnh1Rr2NYpyHvFqsD3v89cY3z4saC8zJxUlABIMSX89uXuODcStFpRm-NiHYCy-Q1enW-u2DYEkMs625HkSrlzGp4dozdfTskmHF1XW7fxwwVl2wUoEcrHk6qqAHiu3KFgYqFtwfMfFoKP4rvCnYLxRJ9pI9n8RwJEpNd_nQT6Yn3HeqlWFRECEcICCZcQr6Ce9Q5Mjbo1bpBmTMHaj_XXckc2noJAe9zfAiQ8NxmP8fs89QWMMTUY2LqcBiy6Mtn4wFkIIeLlkyzJvARC8Mh09TYNC1ploJ70gYK83SLbu7_JazHbOhYORjeGBJ83Ecp4nCjJNQW0Tq6NxzPEVNpCgqLCXOCVsLWxR9VqLB_6iBtsnW9HcnV_eD7ithaUebWZ5n_b2QC87C_y_0pebHMwgRqYta4lfDG8sj9_jvzpGqj2_3aTQsHjYj-Q09AS0xZZdHHV6Z94_E4eQPWRYNaMHc4bUUf5KN-wDOlOrusqbsw9rKkSphidTrNrv2i_ajFyxVjIn_te1udT-rOAw5_2MujRAlo7Wqzx5phoCqy33Z7kEXRmLr5w6xxgxlrBalkyLMKT7DAkQ2D4Sqi5Eh_b6xC4uINbFGdomoBd8621u17B5KJIasCM1t8neLCun2J7Z00dQqY8mNO-R2kT8r98GFVcXyRnb0Dvlt7gpzcQHvF7Ghl1zQ3BLSxuIW7jQ-HNO45kMukb8glGINB7hmyuPx13L6oD0rCpo8eU5jqLpfKAqEq4aqYx0fPrx66IYC29ag2nFkyUrBI7KHe2a6VDMC_dZq9BkccKiFtp5KwYZGprJVYHmZo-kRUWlpqPzbMBFFjG3M0Zxv91XZF2ZkMeo'
@@ -17,6 +18,9 @@ GOAL_PROBABILITY_THRESHOLD = 69
 GOAL_ODD = 1.7
 DRAW_PROBABILITY_THRESHOLD = 45
 DRAW_ODD = 2.0
+
+# File to store detected mixes
+DETECTED_MIXES_FILE = "data/detected_mixes.json"
 
 def send_telegram_message(message):
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
@@ -29,8 +33,14 @@ def send_telegram_message(message):
     return response.json()
 
 def load_json(file_path):
-    with open(file_path, 'r') as file:
-        return json.load(file)
+    if os.path.exists(file_path):
+        with open(file_path, 'r') as file:
+            return json.load(file)
+    return {}
+
+def save_json(data, file_path):
+    with open(file_path, 'w') as file:
+        json.dump(data, file, indent=4)
 
 def generate_file_name(player1, player2):
     current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -508,6 +518,14 @@ def upload_to_dropbox(file_path, dropbox_path):
     shared_link = dbx.sharing_create_shared_link_with_settings(dropbox_path).url
     return shared_link.replace("?dl=0", "?dl=1")
 
+def is_mix_already_detected(mix_key, detected_mixes):
+    """Check if the mix is already in the detected_mixes dictionary."""
+    return mix_key in detected_mixes
+
+def add_mix_to_detected(mix_key, mix_details, detected_mixes):
+    """Add a new mix to the detected_mixes dictionary."""
+    detected_mixes[mix_key] = mix_details
+
 def compare_odds_with_stats(games_with_odds):
     try:
         games_data = load_json(games_with_odds)
@@ -527,6 +545,9 @@ def compare_odds_with_stats(games_with_odds):
     except json.JSONDecodeError as e:
         print(f"Error: Invalid JSON format in Tippmix file - {e}")
         return
+
+    # Load detected mixes
+    detected_mixes = load_json(DETECTED_MIXES_FILE)
 
     for game in games_data:
         home_team = game['home']
@@ -565,6 +586,7 @@ def compare_odds_with_stats(games_with_odds):
                         away_odds = float(odd['odds'].replace(',', '.'))
                     elif odd['team'] == "Döntetlen":
                         draw_odds = float(odd['odds'].replace(',', '.'))
+
                 home_implied_prob = (1 / home_odds) * 100
                 away_implied_prob = (1 / away_odds) * 100
                 draw_implied_prob = (1 / draw_odds) * 100
@@ -572,64 +594,76 @@ def compare_odds_with_stats(games_with_odds):
                 past_50 = stats_data['stats']['past_50']
                 past_30_days = stats_data['stats']['past_30_days']
 
+                # Check for home win opportunity
                 if past_25['win_draw_loss']['win'] >= WIN_PROBABILITY_THRESHOLD and home_odds >= WIN_ODD:
-                    output_file = generate_file_name(player1, player2)
-                    generate_excel(stats_data, output_file)
-                    dropbox_path = f"/{output_file}"
-                    shareable_link = upload_to_dropbox(output_file, dropbox_path)
-                    message = (
-                        f"🚨 **Opportunity Detected** 🚨\n\n"  
-                        f"**Bet On:** Home Win ({player1})\n\n"  
-                        f"**Match:** {player1} vs {player2}\n\n"  
-                        f"**Odds:** {home_odds}\n\n"  
-                        f"**(Past 25 Games):** {past_25['win_draw_loss']['win']}%\n"
-                        f"**(Past 50 Games):** {past_50['win_draw_loss']['win']}%\n"
-                        f"**(Past 30 Days):** {past_30_days['win_draw_loss']['win']}%\n\n"  
-                        f"**Match Link:** {match_link}\n\n"  # Include the match link
-                        f"{shareable_link}\n"
-                    )
-                    print(message)
-                    send_telegram_message(message)
+                    mix_key = f"{player1}_vs_{player2}_home_win"
+                    if not is_mix_already_detected(mix_key, detected_mixes):
+                        output_file = generate_file_name(player1, player2)
+                        generate_excel(stats_data, output_file)
+                        dropbox_path = f"/{output_file}"
+                        shareable_link = upload_to_dropbox(output_file, dropbox_path)
+                        message = (
+                            f"🚨 **Opportunity Detected** 🚨\n\n"
+                            f"**Bet On:** Home Win ({player1})\n\n"
+                            f"**Match:** {player1} vs {player2}\n\n"
+                            f"**Odds:** {home_odds}\n\n"
+                            f"**(Past 25 Games):** {past_25['win_draw_loss']['win']}%\n"
+                            f"**(Past 50 Games):** {past_50['win_draw_loss']['win']}%\n"
+                            f"**(Past 30 Days):** {past_30_days['win_draw_loss']['win']}%\n\n"
+                            f"**Match Link:** {match_link}\n\n"
+                            f"{shareable_link}\n"
+                        )
+                        print(message)
+                        send_telegram_message(message)
+                        add_mix_to_detected(mix_key, {"player1": player1, "player2": player2, "market": "home_win"}, detected_mixes)
 
+                # Check for away win opportunity
                 if past_25['win_draw_loss']['loss'] >= WIN_PROBABILITY_THRESHOLD and away_odds >= WIN_ODD:
-                    output_file = generate_file_name(player1, player2)
-                    generate_excel(stats_data, output_file)
-                    dropbox_path = f"/{output_file}"
-                    shareable_link = upload_to_dropbox(output_file, dropbox_path)
-                    message = (
-                        f"🚨 **Opportunity Detected** 🚨\n\n"  
-                        f"**Bet On:** Away Win ({player2})\n\n"  
-                        f"**Match:** {player1} vs {player2}\n\n"  
-                        f"**Odds:** {away_odds}\n\n"  
-                        f"**(Past 25 Games):** {past_25['win_draw_loss']['loss']}%\n"
-                        f"**(Past 50 Games):** {past_50['win_draw_loss']['loss']}%\n"
-                        f"**(Past 30 Days):** {past_30_days['win_draw_loss']['loss']}%\n\n"  
-                        f"**Match Link:** {match_link}\n\n"  # Include the match link
-                        f"{shareable_link}\n"
-                    )
-                    print(message)
-                    send_telegram_message(message)
+                    mix_key = f"{player1}_vs_{player2}_away_win"
+                    if not is_mix_already_detected(mix_key, detected_mixes):
+                        output_file = generate_file_name(player1, player2)
+                        generate_excel(stats_data, output_file)
+                        dropbox_path = f"/{output_file}"
+                        shareable_link = upload_to_dropbox(output_file, dropbox_path)
+                        message = (
+                            f"🚨 **Opportunity Detected** 🚨\n\n"
+                            f"**Bet On:** Away Win ({player2})\n\n"
+                            f"**Match:** {player1} vs {player2}\n\n"
+                            f"**Odds:** {away_odds}\n\n"
+                            f"**(Past 25 Games):** {past_25['win_draw_loss']['loss']}%\n"
+                            f"**(Past 50 Games):** {past_50['win_draw_loss']['loss']}%\n"
+                            f"**(Past 30 Days):** {past_30_days['win_draw_loss']['loss']}%\n\n"
+                            f"**Match Link:** {match_link}\n\n"
+                            f"{shareable_link}\n"
+                        )
+                        print(message)
+                        send_telegram_message(message)
+                        add_mix_to_detected(mix_key, {"player1": player1, "player2": player2, "market": "away_win"}, detected_mixes)
 
+                # Check for draw opportunity
                 if past_25['win_draw_loss']['draw'] >= DRAW_PROBABILITY_THRESHOLD and draw_odds >= DRAW_ODD:
-                    output_file = generate_file_name(player1, player2)
-                    generate_excel(stats_data, output_file)
-                    dropbox_path = f"/{output_file}"
-                    shareable_link = upload_to_dropbox(output_file, dropbox_path)
-                    message = (
-                        f"🚨 **Opportunity Detected** 🚨\n\n"  
-                        f"**Bet On:** Draw\n\n"  
-                        f"**Match:** {player1} vs {player2}\n\n"  
-                        f"**Odds:** {draw_odds}\n\n"  
-                        f"**(Past 25 Games):** {past_25['win_draw_loss']['draw']}%\n"
-                        f"**(Past 50 Games):** {past_50['win_draw_loss']['draw']}%\n"
-                        f"**(Past 30 Days):** {past_30_days['win_draw_loss']['draw']}%\n\n"  
-                        f"**Match Link:** {match_link}\n\n"  # Include the match link
-                        f"{shareable_link}\n"
-                    )
-                    print(message)
-                    send_telegram_message(message)
+                    mix_key = f"{player1}_vs_{player2}_draw"
+                    if not is_mix_already_detected(mix_key, detected_mixes):
+                        output_file = generate_file_name(player1, player2)
+                        generate_excel(stats_data, output_file)
+                        dropbox_path = f"/{output_file}"
+                        shareable_link = upload_to_dropbox(output_file, dropbox_path)
+                        message = (
+                            f"🚨 **Opportunity Detected** 🚨\n\n"
+                            f"**Bet On:** Draw\n\n"
+                            f"**Match:** {player1} vs {player2}\n\n"
+                            f"**Odds:** {draw_odds}\n\n"
+                            f"**(Past 25 Games):** {past_25['win_draw_loss']['draw']}%\n"
+                            f"**(Past 50 Games):** {past_50['win_draw_loss']['draw']}%\n"
+                            f"**(Past 30 Days):** {past_30_days['win_draw_loss']['draw']}%\n\n"
+                            f"**Match Link:** {match_link}\n\n"
+                            f"{shareable_link}\n"
+                        )
+                        print(message)
+                        send_telegram_message(message)
+                        add_mix_to_detected(mix_key, {"player1": player1, "player2": player2, "market": "draw"}, detected_mixes)
 
-            if "Gólszám - Rendes játékidő" in market['market_title']:  
+            if "Gólszám - Rendes játékidő" in market['market_title']:
                 for odd in market['odds']:
                     line = odd.get('line')
                     line_key = str(line).replace(',', '.')
@@ -647,43 +681,54 @@ def compare_odds_with_stats(games_with_odds):
                     above_prob_30 = past_30_days_goal_thresholds['above'].get(line_key, 0)
                     below_prob_30 = past_30_days_goal_thresholds['below'].get(line_key, 0)
 
+                    # Check for over goals opportunity
                     if above_prob_25 >= GOAL_PROBABILITY_THRESHOLD and over_odds >= GOAL_ODD:
-                        output_file = generate_file_name(player1, player2)
-                        generate_excel(stats_data, output_file)
-                        dropbox_path = f"/{output_file}"
-                        shareable_link = upload_to_dropbox(output_file, dropbox_path)
-                        message = (
-                            f"🚨 **Opportunity Detected** 🚨\n\n"  
-                            f"**Bet On:** Over {line} Goals\n\n"  
-                            f"**Match:** {player1} vs {player2}\n\n"  
-                            f"**Odds:** {over_odds}\n\n"  
-                            f"**(Past 25 Games):** {above_prob_25}%\n"
-                            f"**(Past 50 Games):** {above_prob_50}%\n"
-                            f"**(Past 30 Days):** {above_prob_30}%\n\n"  
-                            f"**Match Link:** {match_link}\n\n"  # Include the match link
-                            f"{shareable_link}\n"
-                        )
-                        print(message)
-                        send_telegram_message(message)
+                        mix_key = f"{player1}_vs_{player2}_over_{line}"
+                        if not is_mix_already_detected(mix_key, detected_mixes):
+                            output_file = generate_file_name(player1, player2)
+                            generate_excel(stats_data, output_file)
+                            dropbox_path = f"/{output_file}"
+                            shareable_link = upload_to_dropbox(output_file, dropbox_path)
+                            message = (
+                                f"🚨 **Opportunity Detected** 🚨\n\n"
+                                f"**Bet On:** Over {line} Goals\n\n"
+                                f"**Match:** {player1} vs {player2}\n\n"
+                                f"**Odds:** {over_odds}\n\n"
+                                f"**(Past 25 Games):** {above_prob_25}%\n"
+                                f"**(Past 50 Games):** {above_prob_50}%\n"
+                                f"**(Past 30 Days):** {above_prob_30}%\n\n"
+                                f"**Match Link:** {match_link}\n\n"
+                                f"{shareable_link}\n"
+                            )
+                            print(message)
+                            send_telegram_message(message)
+                            add_mix_to_detected(mix_key, {"player1": player1, "player2": player2, "market": f"over_{line}"}, detected_mixes)
 
+                    # Check for under goals opportunity
                     if below_prob_25 >= GOAL_PROBABILITY_THRESHOLD and under_odds >= GOAL_ODD:
-                        output_file = generate_file_name(player1, player2)
-                        generate_excel(stats_data, output_file)
-                        dropbox_path = f"/{output_file}"
-                        shareable_link = upload_to_dropbox(output_file, dropbox_path)
-                        message = (
-                            f"🚨 **Opportunity Detected** 🚨\n\n"  
-                            f"**Bet On:** Under {line} Goals\n\n"  
-                            f"**Match:** {player1} vs {player2}\n\n"  
-                            f"**Odds:** {under_odds}\n\n"  
-                            f"**(Past 25 Games):** {below_prob_25}%\n"
-                            f"**(Past 50 Games):** {below_prob_50}%\n"
-                            f"**(Past 30 Days):** {below_prob_30}%\n\n"  
-                            f"**Match Link:** {match_link}\n\n"  # Include the match link
-                            f"{shareable_link}\n"
-                        )
-                        print(message)
-                        send_telegram_message(message)
+                        mix_key = f"{player1}_vs_{player2}_under_{line}"
+                        if not is_mix_already_detected(mix_key, detected_mixes):
+                            output_file = generate_file_name(player1, player2)
+                            generate_excel(stats_data, output_file)
+                            dropbox_path = f"/{output_file}"
+                            shareable_link = upload_to_dropbox(output_file, dropbox_path)
+                            message = (
+                                f"🚨 **Opportunity Detected** 🚨\n\n"
+                                f"**Bet On:** Under {line} Goals\n\n"
+                                f"**Match:** {player1} vs {player2}\n\n"
+                                f"**Odds:** {under_odds}\n\n"
+                                f"**(Past 25 Games):** {below_prob_25}%\n"
+                                f"**(Past 50 Games):** {below_prob_50}%\n"
+                                f"**(Past 30 Days):** {below_prob_30}%\n\n"
+                                f"**Match Link:** {match_link}\n\n"
+                                f"{shareable_link}\n"
+                            )
+                            print(message)
+                            send_telegram_message(message)
+                            add_mix_to_detected(mix_key, {"player1": player1, "player2": player2, "market": f"under_{line}"}, detected_mixes)
+
+    # Save the updated detected mixes to the JSON file
+    save_json(detected_mixes, DETECTED_MIXES_FILE)
 
 if __name__ == "__main__":
     games_with_odds_file = "data/games_with_odds.json"
