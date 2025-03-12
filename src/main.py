@@ -52,9 +52,6 @@ async def run_workflow():
         print("🎉 Workflow completed successfully.")
     except Exception as e:
         print(f"❌ Error in workflow: {e}")
-    finally:
-        cleanup_data_directory()
-        print("🧹 Cleanup completed. Waiting for the next run...")
 
 def schedule_workflow():
     print("⏳ Scheduling workflow to run every 2.5 minutes...")
