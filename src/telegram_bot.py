@@ -10,8 +10,7 @@ from openpyxl.utils import get_column_letter
 # Constants
 TELEGRAM_BOT_TOKEN = '7782619411:AAGABgCUSd4FpVCFzbXWsS9rAy6coxnhQq0'
 TELEGRAM_CHAT_ID = '-4662546396'
-DROPBOX_ACCESS_TOKEN = 'sl.u.AFmJsEarZTCgq2Z4xRbv5PVLz1in9wdgILUDVG6QU1nn_tzjbryvGsQyzulw_jysyrSEAOLZdu1wA4AGkisGiEN9CSOa3bkdP74_GTMdRdUDti4gATDQdlKHJTIU2rsniwPsSssx5IifOF9XPaxKXo94qTiwzTp9VQQjjCCyd2JuoJvzyWFf5A8fZWIkSpoBLxaJpZw7IEParLrOSS2G33aesN-bRV3NTZp-n6R43ZVDZE9cYaY8bqMVYPkElEgBX9TtLdVKUYdu7MocoaV6MfTpQmZwC9GvK8P5oG6VxJiU2ulxC9gm6vJOn22BvqCSZLXQNbeFUyYvWvQtUggLxkWyqZlzB133KCit6hiyZ6QqP61sLUwzP5YDLG7I9sEe_sns-yzizY5bK09YAi5HDGsuVY2mphxZMCS4kS9_oG2lxsiqFwllMGcQBM9iQ3qQV4IFOqPzY3VTL0rxYElWjeDj5ynrVrApNbOjgATqzt8-pEjFFm1DgqXzra4W-ZUAJapgDq_lSzGeI9bPHslaTAzZKYYMY7VCzAZpP0YGaX35dH78XB299Nb5RIXMYC7SpcDGnetAF2p22iLjOXHShZkGB_UwaTAMvNJOh1FGuf9_0VXbfe0uNu7e199cgJ0NqjHF7JFPOJ5jiT8dVIEfghIOKuM8Kb6_nAjB81lsyqxrwit1-tBgrAjpJNcMs7bG-YCyxlWRvpcdAvlhVT-TFMjV6S1wtJn09yMWvq1pM2Z2ijjxkaiaq9Dr8gWTS29Wh21a2MhaWDnpF2yztz_PsUpWtRL4MEkov7cJMAaN3D1xlp2LMGzyfHgp1-vlrRX-oJ3K6AesboA0RHdsVUvH7F499wZkxsJ1dGlagBZ2GXrVxAavafF4MPjBTJlUG_9O202Myr4xymMRqprix6r01LDWZaECTtAqmkGIVIHec8HO5NMVUDfanC0zfFJaamJRo4PtuyeTgzqv0qvU1N5vgFmru28fHV5saZtAp8cRrUXWu-qLTJGvuTjlu6Rv9nsGL8OYOPdRWAV2Pun8JO1shf2AirCp8OxqEPJQV8Ss_xA4Me0dOwgSFEbTZDjD9z7T5e8d3gBglzt6QQL-7vWhHNl57Ge6FyZaQhPUQGgbBdjAPv2ACGTs5_4VTD59F8hejUZvXKG7Drz-MoVr_274abhYL7UUtOpGzGoGC-mtCItsRqRR2aoCKvbAbV53eig4Xe_FJl3jubURxqN2ZlWeL0uVvri8UdwqxJXnZdH3TBXFsWnxK-pumCj8K6DYH1R5i12UI7rBvv5hrz_7wws7yFPGVI3BkIznEzXyfgOEZdtR4TD5HT06PRxp6nRBGVwcKGoxqsOBrYpAVO2s2tKP3s5ioPxp2QbTu6y4rEfVOtoZZ8s9Vax6Pp2qH1DfprAsusITFJSTrSZAyfJs59kj6MvQmupq7B2kqQwiiOgyyH1Pb4f9FciMMm8oCZ0x9TNR380'
-
+DROPBOX_ACCESS_TOKEN = 'sl.u.AFkjqgco1C2r7L5R4mEottepcU30c5LzgjeKJ8pv006k-Zlqt3736soWO89vQXGVKBoUVjzBmZlf_zyVJWIpCtjiLf_89L_rLIWEVDAo3eUh6WSidj-V_i21mEFMZ0zDDDrQEexq8A_avy5aJyMdTZnWj2oFF9OSNtzH6ifMYed3MwmZZuiHbBdmj0f-kgCG98WNxjFZMsHMe_Eg865z4e8An_ldjTiav1QWA8ev0HALzINnKnAnBVPqLJJ4wYPLPLzuqpxbgMvUlfsnjKaAWnpYRxH8paofE4Y-tp3ERtfZcnlvz1fsApKB-IpqEDuB0XQp27YxSzL3OXLLArHAEhMkpl0KucwTpzMobWlcUXb_Wi-gv1BPmY-W2t8LdMMPTdSipzmgrmRKYcszNJnR94pRWW0VvSoF3o4wqc4BzIBqQSPNTekcYKtCmUz950R1yXoVcvzLebI0dwUpiPMLZo2j_LGXyXp89r2-6WMjzjFJv4r2leIgeakPsB9Qg3MlOm3SSknjHVcBA2yXR_ruSOR7jt9i_9PqbvjgW-CBGkix0jFWsRxD4xYzVbS4dnk98gzYtIX38DjWhD_biQQBCUToyH7L4Rp6oxLxcEcIZmBZ3GkhdaIGmIZ_kW0VT8ChztXtzjskiDJjFCEsC7kPPL_k60ntAv0TJTwfIJ644L9OZCX2J2jzPhQyBqv3Ijz0JOZvsVIuHLEnFF7KZqNgwalyiIrp-0uuGuocIZjymKEoCZxDhFRdVsrfpcMYsFn871atFJ7CDLfomHkG3u7q1VKPS5hm88wstO-bcn_BJL1yLOX55xG-QbT6B4dvNPaE5QXu_EwjQnDW4GQgcR6fyi_tdRd4dFY7_54Y6Ta9JP7nk9rBvo1snk1Iydl5eItS-CqwJG5Vf3qJc-KOmCpX7Qw5EiBlLGYKGoGkVvtfczl8guU3QvWVIVky-55efJooh6NCCx2EAOZIPoP2iyP-Wb_yx9oq92ZjfzwP3CjUnqsE68pQIHopZmD3QPdv3r1V7dhI2npMW56U6_dZ6fAu-rbHhMYLqsvClf7qe9SFEGuNRaH0fdoocIJw4T_HBhJ9phrj_VU1SIZMEeiTKuQFEia_8Ez2wbo6JHpq6fJRiG7N0YKaAeEIZMGLCFp7ecHzqddhba4GYYnvVCuM9ly07Va1kqZYzhup6zWnQ3bLvCHXb1-Pfiw-ZsYEXizxAg27Hv_5IpulfssGFpnETz3gczM6Jw1W65oZ05kF09_AIbNJH0CTsV1CVGyjKlBvkbQ8Hs_aGD71YF4AZ4oS2eeiskrwbmffUGQTuxDL1y1uj3nbphMKK9NysDGLoCrcmjrOY1HkzEPdMdVxRXBCikqeVKW5q5VGXGFNKLgVA_Qm0OQ9UZbVKrZoNZaZg0tjxhEdk5CJi_Yz4rwqU1Ek0G6EYcDJrUB4wwJIh4XKKmQNX-_YcGqL9sI6ELOLL79C4LM-Gtw'
 WIN_PROBABILITY_THRESHOLD = 45
 WIN_ODD = 2.0
 GOAL_PROBABILITY_THRESHOLD = 69
@@ -525,6 +524,29 @@ def is_mix_already_detected(mix_key, detected_mixes):
 def add_mix_to_detected(mix_key, mix_details, detected_mixes):
     """Add a new mix to the detected_mixes dictionary."""
     detected_mixes[mix_key] = mix_details
+
+def cleanup_data_directory():
+    """Delete all JSON files in the data directory except for essential files."""
+    data_dir = "data"
+    essential_files = [
+        "detected_mixes.json",  # Preserve detected mixes
+        "games_with_odds.json",  # Preserve odds data
+        "player_stats_output.json",  # Preserve player stats
+        "tippmixpro_upcoming_games.json",  # Preserve upcoming games
+    ]
+
+    # Get a list of all JSON files in the data directory
+    json_files = glob.glob(os.path.join(data_dir, "*.json"))
+
+    # Delete each JSON file that is not essential
+    for json_file in json_files:
+        if os.path.basename(json_file) not in essential_files:
+            try:
+                os.remove(json_file)
+                print(f"Deleted: {json_file}")
+            except Exception as e:
+                print(f"Error deleting {json_file}: {e}")
+
 
 def compare_odds_with_stats(games_with_odds):
     try:
